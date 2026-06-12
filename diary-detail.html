@@ -13,38 +13,62 @@
 
     <script>
         // ==========================================
-        // 1. 先ほどと同じあなたの情報に書き換えてください
+        // あなたのmicroCMSの情報に書き換えてください
         // ==========================================
         const serviceId = 'gyobu';
         const endpoint  = 'posts';
         const apiKey    = 'lx9FPrqyNhcjc4Y9e8hmaLrx2q6sL7mwijEr';
 
-        // ==========================================
-        // 2. URLから「どの日記を開いたか」のIDを受け取る
-        // ==========================================
+        function getCharCount(htmlString) {
+            if (!htmlString) return 0;
+            const tmp = document.createElement('div');
+            tmp.innerHTML = htmlString;
+            return tmp.textContent.replace(/\s+/g, '').length;
+        }
+
+        // URLから「記事のID」と「どこから来たか(from)」を受け取る
         const urlParams = new URLSearchParams(window.location.search);
         const postId = urlParams.get('id');
+        const fromPage = urlParams.get('from'); // ▼ ここを追加 ▼
 
-        // ==========================================
-        // 3. microCMSから「そのIDの日記だけ」を取得して表示する
-        // ==========================================
         async function fetchDiaryDetail() {
             try {
-                // 先ほどのURLの末尾に /${postId} を足すことで1件だけ取得できます
                 const response = await fetch(`https://${serviceId}.microcms.io/api/v1/${endpoint}/${postId}`, {
                     headers: { 'X-MICROCMS-API-KEY': apiKey }
                 });
                 const post = await response.json();
                 
-                // 日付の整形
                 const dateObj = new Date(post.date);
                 const formattedDate = `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
                 
-                // 画面に表示するHTMLを組み立てる
+                // ==========================================
+                // ▼ 戻るボタンのリンク先を判定する処理 ▼
+                // ==========================================
+                let backLinkUrl = 'diary-list.html';
+                let backLinkText = '一覧に戻る';
+                
+                if (fromPage === 'home') {
+                    // ホーム画面から来た場合は、完全にホームへ戻す
+                    backLinkUrl = 'index.html';
+                    backLinkText = 'ホームに戻る';
+                } else if (post.genre) {
+                    // それ以外（一覧から来た場合など）は、そのジャンルの一覧に戻す
+                    const genreName = Array.isArray(post.genre) ? post.genre[0] : post.genre;
+                    backLinkUrl = `diary-list.html?genre=${encodeURIComponent(genreName)}`;
+                    backLinkText = `${genreName}一覧に戻る`;
+                }
+                
+                // 文字数を計算する
+                const charCount = getCharCount(post.content);
+
                 const container = document.getElementById('detail-container');
                 container.innerHTML = `
                     <h1><span class="icon">📄</span> ${post.title}</h1>
-                    <p style="color: #a0a0a0; font-size: 14px;">${formattedDate}</p>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; margin-bottom: 20px;">
+                        <p style="color: #a0a0a0; font-size: 14px; margin: 0;">${formattedDate}</p>
+                        <p style="color: #a0a0a0; font-size: 14px; margin: 0;">${charCount}文字</p>
+                    </div>
                     
                     ${post.image ? `<img src="${post.image.url}" alt="${post.title}">` : ''}
                     
@@ -52,7 +76,7 @@
                         ${post.content}
                     </div>
                     
-                    <a href="diary-list.html" class="back-link">← 一覧に戻る</a>
+                    <a href="${backLinkUrl}" class="back-link">← ${backLinkText}</a>
                 `;
             } catch (error) {
                 document.getElementById('detail-container').innerHTML = '<p style="color: red;">読み込みに失敗しました。</p>';
@@ -60,7 +84,6 @@
             }
         }
 
-        // IDがちゃんと受け取れていたら処理をスタート
         if (postId) {
             fetchDiaryDetail();
         } else {

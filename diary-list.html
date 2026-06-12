@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>一覧</title>
+    <title>投稿一覧</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="top-header">
-        <h1>すべての投稿</h1>
+        <h1 id="page-title">すべての投稿</h1>
         <a href="index.html" class="back-link" style="margin-top: 15px; font-size: 14px;">← ホームに戻る</a>
     </header>
 
@@ -22,7 +22,21 @@
         // ==========================================
         const serviceId = 'gyobu'; 
         const endpoint  = 'posts'; 
-        const apiKey    = 'lx9FPrqyNhcjc4Y9e8hmaLrx2q6sL7mwijEr';    
+        const apiKey    = 'lx9FPrqyNhcjc4Y9e8hmaLrx2q6sL7mwijEr';   
+        
+        // 目に見える文字数だけをカウントする関数
+        function getCharCount(htmlString) {
+            if (!htmlString) return 0;
+            const tmp = document.createElement('div');
+            tmp.innerHTML = htmlString;
+            return tmp.textContent.replace(/\s+/g, '').length;
+        }
+
+        // ==========================================
+        // URLから「どのジャンルが選ばれたか」を受け取る
+        // ==========================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedGenre = urlParams.get('genre');
 
         async function fetchDiaries() {
             try {
@@ -30,7 +44,23 @@
                     headers: { 'X-MICROCMS-API-KEY': apiKey }
                 });
                 const data = await response.json();
-                displayDiaries(data.contents);
+                let posts = data.contents;
+
+                // ▼ ここを追加：設定した日付（date）が新しい順に並び替える ▼
+                posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // ▼ ジャンルが指定されている場合は、そのジャンルで絞り込む ▼
+                if (selectedGenre) {
+                    // microCMSの配列仕様に合わせて判定
+                    posts = posts.filter(post => post.genre && (post.genre === selectedGenre || post.genre.includes(selectedGenre)));
+                    
+                    // ページのタイトルも「〇〇一覧」に変更する
+                    document.getElementById('page-title').innerText = `${selectedGenre}一覧`;
+                    document.title = `${selectedGenre}一覧`;
+                }
+
+                displayDiaries(posts);
+
             } catch (error) {
                 document.getElementById('post-container').innerHTML = '<p style="color: red; text-align: center;">データの読み込みに失敗しました。</p>';
                 console.error(error);
@@ -39,16 +69,30 @@
 
         function displayDiaries(posts) {
             const container = document.getElementById('post-container');
-            let html = '';
+            
+            // 絞り込んだ結果、記事が1つもない場合の処理
+            if (posts.length === 0) {
+                container.innerHTML = '<p style="color: #a0a0a0; text-align: center; width: 100%;">まだこのジャンルの投稿はありません。</p>';
+                return;
+            }
 
+            let html = '';
             posts.forEach(post => {
                 const dateObj = new Date(post.date);
                 const formattedDate = `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
                 const imageUrl = post.image ? post.image.url : '';
-                const tagColor = post.tagColor || 'gray';
+                
+                let tagColor = 'gray';
+                if (post.tagColor) {
+                    tagColor = Array.isArray(post.tagColor) ? post.tagColor[0] : post.tagColor;
+                }
+
+                // ▼▼▼ ここから下の区切り記号を修正しました ▼▼▼
+                // 文字数を計算する
+                const charCount = getCharCount(post.content);
 
                 html += `
-                <a href="diary-detail.html?id=${post.id}" class="card">
+                <a href="diary-detail.html?id=${post.id}&from=list" class="card">
                     <div class="card-image">
                         ${imageUrl ? `<img src="${imageUrl}" alt="${post.title}">` : `<div style="width:100%; height:100%; background:#444;"></div>`}
                     </div>
@@ -56,10 +100,15 @@
                         <h3 class="card-title"><span class="icon">📄</span> ${post.title}</h3>
                         <p class="card-date">${formattedDate}</p>
                         <p class="card-subtitle">${post.subtitle || ''}</p>
-                        <span class="card-tag tag-${tagColor}">${post.tag || 'タグなし'}</span>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px;">
+                            <span class="card-tag tag-${tagColor}">${post.tag || 'タグなし'}</span>
+                            <span style="font-size: 11px; color: #888;">${charCount}文字</span>
+                        </div>
                     </div>
                 </a>
                 `;
+                // ▲▲▲ 修正ここまで ▲▲▲
             });
 
             container.innerHTML = html;

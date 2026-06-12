@@ -15,8 +15,8 @@
         
         <section class="genre-section">
             <div class="genre-header">
-                <h2>📔 事実</h2>
-                <a href="diary-list.html" class="see-all">すべて見る →</a>
+                <h2>事実</h2>
+                <a href="diary-list.html?genre=事実" class="see-all">すべて見る →</a>
             </div>
             <div id="posts-diary" class="recent-posts">
                 <p style="color: #fff;">読み込み中...</p>
@@ -25,8 +25,8 @@
 
         <section class="genre-section">
             <div class="genre-header">
-                <h2>🎲 適当</h2>
-                <a href="diary-list.html" class="see-all">すべて見る →</a>
+                <h2>適当</h2>
+                <a href="diary-list.html?genre=適当" class="see-all">すべて見る →</a>
             </div>
             <div id="posts-random" class="recent-posts">
                 <p style="color: #fff;">読み込み中...</p>
@@ -35,8 +35,8 @@
 
         <section class="genre-section">
             <div class="genre-header">
-                <h2>💭 感想</h2>
-                <a href="diary-list.html" class="see-all">すべて見る →</a>
+                <h2>感想</h2>
+                <a href="diary-list.html?genre=感想" class="see-all">すべて見る →</a>
             </div>
             <div id="posts-review" class="recent-posts">
                 <p style="color: #fff;">読み込み中...</p>
@@ -50,6 +50,14 @@
         const endpoint  = 'posts';
         const apiKey    = 'lx9FPrqyNhcjc4Y9e8hmaLrx2q6sL7mwijEr';
 
+        // 目に見える文字数だけをカウントする関数
+        function getCharCount(htmlString) {
+            if (!htmlString) return 0;
+            const tmp = document.createElement('div');
+            tmp.innerHTML = htmlString;
+            return tmp.textContent.replace(/\s+/g, '').length; // 空白や改行を除いてカウント
+        }
+
         async function fetchTopPagePosts() {
             try {
                 const response = await fetch(`https://${serviceId}.microcms.io/api/v1/${endpoint}`, {
@@ -57,6 +65,9 @@
                 });
                 const data = await response.json();
                 const allPosts = data.contents;
+
+                // ▼ ここを追加：設定した日付（date）が新しい順に並び替える ▼
+                allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 // ▼ ジャンルの判定方法をmicroCMSの配列仕様に合わせて修正しました ▼
                 const diaries = allPosts.filter(post => post.genre && (post.genre === '事実' || post.genre.includes('事実')));
@@ -96,20 +107,28 @@
                     tagColor = Array.isArray(post.tagColor) ? post.tagColor[0] : post.tagColor;
                 }
 
+                // 文字数を計算する
+                const charCount = getCharCount(post.content);
+
                 html += `
-                <a href="diary-detail.html?id=${post.id}" class="card">
-                    <div class="card-image">
-                        ${imageUrl ? `<img src="${imageUrl}" alt="${post.title}">` : `<div style="width:100%; height:100%; background:#444;"></div>`}
-                    </div>
-                    <div class="card-content">
-                        <h3 class="card-title"><span class="icon">📄</span> ${post.title}</h3>
-                        <p class="card-date">${formattedDate}</p>
-                        <p class="card-subtitle">${post.subtitle || ''}</p>
+            <a href="diary-detail.html?id=${post.id}&from=home" class="card">
+                <div class="card-image">
+                    ${imageUrl ? `<img src="${imageUrl}" alt="${post.title}">` : `<div style="width:100%; height:100%; background:#444;"></div>`}
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title"><span class="icon">📄</span> ${post.title}</h3>
+                    <p class="card-date">${formattedDate}</p>
+                    <p class="card-subtitle">${post.subtitle || ''}</p>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4px;">
                         <span class="card-tag tag-${tagColor}">${post.tag || 'タグなし'}</span>
+                        <span style="font-size: 11px; color: #888;">${charCount}文字</span>
                     </div>
-                </a>
-                `;
-            });
+                </div>
+            </a>
+            `;
+            }); // ▼▼▼ ここが抜けていました！ ▼▼▼
+
             container.innerHTML = html;
         }
 
