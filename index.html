@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyobu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top-header">
+        <h1>おつかれさまです</h1>
+    </header>
+
+    <main class="top-container">
+        
+        <section class="genre-section">
+            <div class="genre-header">
+                <h2>📔 事実</h2>
+                <a href="diary-list.html" class="see-all">すべて見る →</a>
+            </div>
+            <div id="posts-diary" class="recent-posts">
+                <p style="color: #fff;">読み込み中...</p>
+            </div>
+        </section>
+
+        <section class="genre-section">
+            <div class="genre-header">
+                <h2>🎲 適当</h2>
+                <a href="diary-list.html" class="see-all">すべて見る →</a>
+            </div>
+            <div id="posts-random" class="recent-posts">
+                <p style="color: #fff;">読み込み中...</p>
+            </div>
+        </section>
+
+        <section class="genre-section">
+            <div class="genre-header">
+                <h2>💭 感想</h2>
+                <a href="diary-list.html" class="see-all">すべて見る →</a>
+            </div>
+            <div id="posts-review" class="recent-posts">
+                <p style="color: #fff;">読み込み中...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const serviceId = 'gyobu';
+        const endpoint  = 'posts';
+        const apiKey    = 'lx9FPrqyNhcjc4Y9e8hmaLrx2q6sL7mwijEr';
+
+        async function fetchTopPagePosts() {
+            try {
+                const response = await fetch(`https://${serviceId}.microcms.io/api/v1/${endpoint}`, {
+                    headers: { 'X-MICROCMS-API-KEY': apiKey }
+                });
+                const data = await response.json();
+                const allPosts = data.contents;
+
+                // ▼ ジャンルの判定方法をmicroCMSの配列仕様に合わせて修正しました ▼
+                const diaries = allPosts.filter(post => post.genre && (post.genre === '事実' || post.genre.includes('事実')));
+                const randoms = allPosts.filter(post => post.genre && (post.genre === '適当' || post.genre.includes('適当')));
+                const reviews = allPosts.filter(post => post.genre && (post.genre === '感想' || post.genre.includes('感想')));
+
+                // それぞれ直近3件だけを表示する
+                renderCards('posts-diary', diaries.slice(0, 3));
+                renderCards('posts-random', randoms.slice(0, 3));
+                renderCards('posts-review', reviews.slice(0, 3));
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('posts-diary').innerHTML = '<p style="color: red;">エラーが発生しました</p>';
+                document.getElementById('posts-random').innerHTML = '<p style="color: red;">エラーが発生しました</p>';
+                document.getElementById('posts-review').innerHTML = '<p style="color: red;">エラーが発生しました</p>';
+            }
+        }
+
+        function renderCards(containerId, posts) {
+            const container = document.getElementById(containerId);
+            
+            if (!posts || posts.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-size: 13px; padding: 10px 0;">まだ投稿がありません</p>';
+                return;
+            }
+
+            let html = '';
+            posts.forEach(post => {
+                const dateObj = new Date(post.date);
+                const formattedDate = `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
+                const imageUrl = post.image ? post.image.url : '';
+                
+                // タグの色も配列で返ってくる可能性があるため修正
+                let tagColor = 'gray';
+                if (post.tagColor) {
+                    tagColor = Array.isArray(post.tagColor) ? post.tagColor[0] : post.tagColor;
+                }
+
+                html += `
+                <a href="diary-detail.html?id=${post.id}" class="card">
+                    <div class="card-image">
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${post.title}">` : `<div style="width:100%; height:100%; background:#444;"></div>`}
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title"><span class="icon">📄</span> ${post.title}</h3>
+                        <p class="card-date">${formattedDate}</p>
+                        <p class="card-subtitle">${post.subtitle || ''}</p>
+                        <span class="card-tag tag-${tagColor}">${post.tag || 'タグなし'}</span>
+                    </div>
+                </a>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        fetchTopPagePosts();
+    </script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+/* 全体の基本設定（ダークモード） */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #191919; 
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ==========================================
+   パソコン（PC）用の設定
+   ========================================== */
+
+/* マスを並べるグリッド */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 240px);
+    justify-content: start; 
+    gap: 16px;
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* 【PC】1つ1つのマスを完全な正方形（240px × 240px）にする */
+.card {
+    background-color: #2b2b2b; 
+    border-radius: 12px; /* 送っていただいた画像に近い丸みに調整 */
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    height: 240px; /* 高さを幅と同じにして正方形に固定 */
+    transition: background-color 0.2s; 
+}
+
+.card:hover {
+    background-color: #383838;
+}
+
+/* 【PC】正方形のマスの中に収まるよう写真の高さを調整 */
+.card-image {
+    width: 100%;
+    height: 130px; 
+    background-color: #444; 
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 縦横比を崩さずに枠を埋める */
+}
+
+/* カード内のテキストエリア */
+.card-content {
+    padding: 12px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 内容を上下にきれいに分散配置 */
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.3;
+    /* タイトルが長すぎるときのはみ出し防止（2行まで） */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.icon {
+    font-weight: normal;
+    font-size: 14px;
+}
+
+.card-date, .card-subtitle {
+    font-size: 12px;
+    color: #a0a0a0;
+    line-height: 1.4;
+    margin-top: 2px;
+}
+
+/* タグの設定 */
+.card-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    width: fit-content;
+}
+
+/* --- タグのカラーバリエーション --- */
+.tag-blue { background-color: #1e3a5f; color: #90caf9; }
+.tag-green { background-color: #1b4332; color: #a3e635; }
+.tag-pink { background-color: #4a1c40; color: #f48fb1; }
+.tag-orange { background-color: #5a3415; color: #ffb74d; }
+.tag-gray { background-color: #404040; color: #e0e0e0; }
+
+/* --- 個別の文章ページ用デザイン --- */
+.diary-content {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+}
+
+.diary-content h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.diary-content img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.diary-content p {
+    line-height: 1.8;
+    margin-bottom: 20px;
+    color: #d0d0d0;
+}
+
+.back-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #404040;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-top: 20px;
+}
+.back-link:hover {
+    background: #505050;
+}
+
+/* --- トップページ（ジャンル選択画面）専用のデザイン --- */
+.top-header {
+    text-align: center;
+    padding: 40px 20px 20px;
+}
+
+.top-header h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: #ffffff;
+}
+
+.top-header p {
+    color: #a0a0a0;
+    font-size: 14px;
+}
+
+.top-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 24px 60px;
+}
+
+.genre-section {
+    margin-bottom: 40px;
+}
+
+.genre-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.genre-header h2 {
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.see-all {
+    font-size: 13px;
+    color: #a0a0a0;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.see-all:hover {
+    color: #ffffff;
+}
+
+.recent-posts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 240px);
+    justify-content: start; 
+    gap: 16px;
+}
+
+/* ==========================================
+   スマートフォン（スマホ）用の調整
+   ========================================== */
+@media (max-width: 768px) {
+    
+    /* ▼ 1. すべての投稿画面（2列一覧）の設定 ▼ */
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr); /* 絶対に2列にする */
+        gap: 12px;
+        padding: 12px;
+    }
+
+    /* 【スマホ一覧】マス自体を完全な正方形（1:1）にする */
+    .grid-container .card {
+        width: 100%;
+        aspect-ratio: 1 / 1; 
+        height: auto; 
+    }
+
+    /* 【スマホ一覧】正方形の中に収まるよう写真を上半分（50%）にする */
+    .grid-container .card-image {
+        height: 50%; 
+    }
+
+    /* スマホ用に文字サイズや余白を小さく調整 */
+    .grid-container .card-content {
+        padding: 8px;
+    }
+    .grid-container .card-title {
+        font-size: 12px;
+    }
+    .grid-container .card-date,
+    .grid-container .card-subtitle {
+        font-size: 10px;
+    }
+    .grid-container .card-tag {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+
+
+    /* ▼ 2. ジャンル選択画面（横スクロール）の設定 ▼ */
+    .recent-posts {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 12px;
+        scroll-snap-type: x mandatory;
+        margin-right: -24px;
+        padding-right: 24px;
+    }
+    
+    /* 【スマホ横スク】マス自体を完全な正方形（160px × 160px）にする */
+    .recent-posts .card {
+        width: 160px; 
+        height: 160px; 
+        flex: 0 0 auto; 
+        scroll-snap-align: start;
+    }
+
+    /* 【スマホ横スク】正方形に収まるよう写真の高さを設定 */
+    .recent-posts .card-image {
+        width: 100%;
+        height: 90px; 
+    }
+
+    .recent-posts .card-content {
+        padding: 8px;
+    }
+
+    .recent-posts .card-title {
+        font-size: 12px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2; 
+        overflow: hidden;
+    }
+
+    .recent-posts .card-date,
+    .recent-posts .card-subtitle {
+        font-size: 10px;
+    }
+    
+    .recent-posts .card-tag {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+    
+    /* スクロールバーの調整 */
+    .recent-posts::-webkit-scrollbar {
+        height: 6px;
+    }
+    .recent-posts::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 3px;
+    }
+}

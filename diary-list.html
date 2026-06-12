@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一覧</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top-header">
+        <h1>すべての投稿</h1>
+        <a href="index.html" class="back-link" style="margin-top: 15px; font-size: 14px;">← ホームに戻る</a>
+    </header>
+
+    <main id="post-container" class="grid-container">
+        <p style="color: #fff; text-align: center;">読み込み中...</p>
+    </main>
+
+    <script>
+        // ==========================================
+        // あなたのmicroCMSの情報に書き換えてください
+        // ==========================================
+        const serviceId = 'gyobu'; 
+        const endpoint  = 'posts'; 
+        const apiKey    = 'lx9FPrqyNhcjc4Y9e8hmaLrx2q6sL7mwijEr';    
+
+        async function fetchDiaries() {
+            try {
+                const response = await fetch(`https://${serviceId}.microcms.io/api/v1/${endpoint}`, {
+                    headers: { 'X-MICROCMS-API-KEY': apiKey }
+                });
+                const data = await response.json();
+                displayDiaries(data.contents);
+            } catch (error) {
+                document.getElementById('post-container').innerHTML = '<p style="color: red; text-align: center;">データの読み込みに失敗しました。</p>';
+                console.error(error);
+            }
+        }
+
+        function displayDiaries(posts) {
+            const container = document.getElementById('post-container');
+            let html = '';
+
+            posts.forEach(post => {
+                const dateObj = new Date(post.date);
+                const formattedDate = `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
+                const imageUrl = post.image ? post.image.url : '';
+                const tagColor = post.tagColor || 'gray';
+
+                html += `
+                <a href="diary-detail.html?id=${post.id}" class="card">
+                    <div class="card-image">
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${post.title}">` : `<div style="width:100%; height:100%; background:#444;"></div>`}
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title"><span class="icon">📄</span> ${post.title}</h3>
+                        <p class="card-date">${formattedDate}</p>
+                        <p class="card-subtitle">${post.subtitle || ''}</p>
+                        <span class="card-tag tag-${tagColor}">${post.tag || 'タグなし'}</span>
+                    </div>
+                </a>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        fetchDiaries();
+    </script>
+</body>
+</html>
