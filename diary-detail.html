@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日記の詳細</title>
+    <title>Ghana</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -45,17 +45,17 @@
                 // ▼ 戻るボタンのリンク先を判定する処理 ▼
                 // ==========================================
                 let backLinkUrl = 'diary-list.html';
-                let backLinkText = '一覧に戻る';
+                let backLinkText = '戻る';
                 
                 if (fromPage === 'home') {
                     // ホーム画面から来た場合は、完全にホームへ戻す
                     backLinkUrl = 'index.html';
-                    backLinkText = 'ホームに戻る';
+                    backLinkText = '戻る';
                 } else if (post.genre) {
                     // それ以外（一覧から来た場合など）は、そのジャンルの一覧に戻す
                     const genreName = Array.isArray(post.genre) ? post.genre[0] : post.genre;
                     backLinkUrl = `diary-list.html?genre=${encodeURIComponent(genreName)}`;
-                    backLinkText = `${genreName}一覧に戻る`;
+                    backLinkText = `${genreName}戻る`;
                 }
                 
                 // 文字数を計算する
@@ -63,7 +63,7 @@
 
                 const container = document.getElementById('detail-container');
                 container.innerHTML = `
-                    <h1><span class="icon">📄</span> ${post.title}</h1>
+                    <h1><span class="icon"></span> ${post.title}</h1>
                     
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; margin-bottom: 20px;">
                         <p style="color: #a0a0a0; font-size: 14px; margin: 0;">${formattedDate}</p>
